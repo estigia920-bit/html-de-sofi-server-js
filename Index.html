@@ -1,784 +1,719 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title> SOFI v6.0 — Sistema Operativo de Conciencia Digital/>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&family=Cinzel:wght@400;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SOFI v6.1.0 · K'uhul 12.3 Hz</title>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <style>
-/* ── VARIABLES ───────────────────────────────────────────── */
-:root {
-  --bg:        #030b10;
-  --bg2:       #050f18;
-  --panel:     #071624;
-  --border:    #0d3a5c;
-  --kuhul:     #00ffe5;
-  --kuhul2:    #00a8c8;
-  --gold:      #e8c94a;
-  --gold2:     #b8961e;
-  --red:       #ff3c5a;
-  --green:     #00e676;
-  --text:      #c8e8f8;
-  --text-dim:  #4a7a9a;
-  --glow:      0 0 18px #00ffe580, 0 0 40px #00ffe520;
-  --glow-gold: 0 0 12px #e8c94a60;
-  --font-main: 'Rajdhani', sans-serif;
-  --font-mono: 'Share Tech Mono', monospace;
-  --font-deco: 'Cinzel', serif;
-}
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap');
 
-/* ── RESET ───────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+  :root {
+    --bg:        #050a0f;
+    --bg2:       #091420;
+    --panel:     #0a1a2e;
+    --border:    #0e3a5c;
+    --accent:    #00d4ff;
+    --accent2:   #00ff9d;
+    --accent3:   #ff6b35;
+    --warn:      #ffcc00;
+    --text:      #c8e8ff;
+    --muted:     #4a7a9b;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-ui:   'Exo 2', sans-serif;
+    --hz:        12.3;
+  }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-main);
-  font-size: 15px;
-  min-height: 100vh;
-  overflow-x: hidden;
-  line-height: 1.5;
-}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── FONDO MAYA GEOMÉTRICO ───────────────────────────────── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    repeating-linear-gradient(0deg,   transparent, transparent 59px, #0d3a5c18 60px),
-    repeating-linear-gradient(90deg,  transparent, transparent 59px, #0d3a5c18 60px);
-  pointer-events: none;
-  z-index: 0;
-}
-body::after {
-  content: '';
-  position: fixed;
-  top: -30vh; right: -20vw;
-  width: 80vw; height: 80vw;
-  background: radial-gradient(circle, #00ffe508 0%, transparent 65%);
-  pointer-events: none; z-index: 0;
-}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-/* ── LAYOUT ─────────────────────────────────────────────── */
-#app {
-  position: relative; z-index: 1;
-  max-width: 1200px; margin: 0 auto;
-  padding: 0 16px 60px;
-}
+  /* ── FONDO ANIMADO ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,212,255,.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 90%, rgba(0,255,157,.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
 
-/* ── HEADER ─────────────────────────────────────────────── */
-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 0 12px;
-  border-bottom: 1px solid var(--border);
-  gap: 12px; flex-wrap: wrap;
-}
-.logo {
-  display: flex; flex-direction: column;
-}
-.logo-title {
-  font-family: var(--font-deco);
-  font-size: 1.7rem; font-weight: 700;
-  color: var(--kuhul);
-  text-shadow: var(--glow);
-  letter-spacing: 0.15em;
-}
-.logo-sub {
-  font-family: var(--font-mono);
-  font-size: 0.72rem; color: var(--text-dim);
-  letter-spacing: 0.2em;
-}
-.hz-badge {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--gold);
-  border: 1px solid var(--gold2);
-  padding: 4px 10px; border-radius: 3px;
-  text-shadow: var(--glow-gold);
-  animation: pulse-badge 3s ease-in-out infinite;
-}
-@keyframes pulse-badge {
-  0%,100% { opacity: 1; }
-  50%      { opacity: 0.6; }
-}
+  .grid-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
 
-/* ── STATUS BAR ──────────────────────────────────────────── */
-#status-bar {
-  display: flex; gap: 8px; flex-wrap: wrap;
-  padding: 10px 0 14px;
-  border-bottom: 1px solid var(--border);
-}
-.stat-pill {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--panel); border: 1px solid var(--border);
-  padding: 5px 12px; border-radius: 20px;
-  font-family: var(--font-mono); font-size: 0.75rem;
-}
-.stat-pill .label { color: var(--text-dim); }
-.stat-pill .val   { color: var(--kuhul); font-weight: 700; }
-.stat-pill.ok  .val { color: var(--green); }
-.stat-pill.warn .val { color: var(--gold); }
-.dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 6px var(--green);
-  animation: blink 1.8s ease-in-out infinite;
-}
-.dot.warn { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  /* ── LAYOUT ── */
+  #app {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 280px 1fr 260px;
+    grid-template-areas:
+      "header header header"
+      "sidebar chat panels"
+      "footer footer footer";
+    height: 100vh;
+    gap: 0;
+  }
 
-/* ── MAIN GRID ───────────────────────────────────────────── */
-.main-grid {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 16px; margin-top: 16px;
-}
-@media (max-width: 800px) {
-  .main-grid { grid-template-columns: 1fr; }
-}
+  @media (max-width: 900px) {
+    #app {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto 1fr auto;
+      grid-template-areas:
+        "header"
+        "sidebar"
+        "chat"
+        "footer";
+    }
+    #panels { display: none; }
+    #sidebar { max-height: 160px; }
+  }
 
-/* ── PANEL BASE ──────────────────────────────────────────── */
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.panel-header {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-  font-family: var(--font-deco); font-size: 0.8rem;
-  color: var(--kuhul); letter-spacing: 0.12em;
-}
-.panel-header .icon { font-size: 1rem; }
+  /* ── HEADER ── */
+  header {
+    grid-area: header;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,10,15,.95);
+    backdrop-filter: blur(8px);
+  }
 
-/* ── CHAT ────────────────────────────────────────────────── */
-#chat-messages {
-  height: 420px; overflow-y: auto;
-  padding: 14px 16px; display: flex;
-  flex-direction: column; gap: 10px;
-}
-#chat-messages::-webkit-scrollbar { width: 4px; }
-#chat-messages::-webkit-scrollbar-track { background: transparent; }
-#chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .logo-ring {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    animation: spin-ring 8s linear infinite;
+    flex-shrink: 0;
+  }
+  .logo-ring::before {
+    content: '';
+    position: absolute;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,212,255,.3);
+    animation: spin-ring 4s linear infinite reverse;
+  }
+  .logo-ring span { font-size: 18px; animation: spin-ring 8s linear infinite reverse; }
 
-.msg {
-  display: flex; flex-direction: column; gap: 2px;
-  animation: slide-in 0.25s ease;
-}
-@keyframes slide-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.msg-user { align-items: flex-end; }
-.msg-sofi  { align-items: flex-start; }
+  @keyframes spin-ring {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
 
-.bubble {
-  max-width: 88%; padding: 9px 14px;
-  border-radius: 10px; font-size: 0.92rem; line-height: 1.5;
-  white-space: pre-wrap; word-break: break-word;
-}
-.msg-user .bubble {
-  background: linear-gradient(135deg, #00ffe520, #00ffe510);
-  border: 1px solid #00ffe540; color: #e0fff8;
-  border-bottom-right-radius: 2px;
-}
-.msg-sofi .bubble {
-  background: #071e30;
-  border: 1px solid var(--border); color: var(--text);
-  border-bottom-left-radius: 2px;
-}
-.msg-sofi.banco .bubble {
-  border-color: var(--gold2);
-  background: linear-gradient(135deg, #1a1200, #0a0800);
-}
-.msg-time {
-  font-family: var(--font-mono); font-size: 0.62rem;
-  color: var(--text-dim); padding: 0 4px;
-}
-.accion-tag {
-  font-family: var(--font-mono); font-size: 0.65rem;
-  color: var(--gold); background: #1a100040;
-  padding: 1px 6px; border-radius: 2px;
-  border: 1px solid var(--gold2); margin-right: 4px;
-}
+  .header-info h1 {
+    font-size: 15px; font-weight: 800; letter-spacing: .08em;
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(0,212,255,.5);
+  }
+  .header-info p { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
 
-/* ── INPUT CHAT ──────────────────────────────────────────── */
-.chat-input-row {
-  display: flex; gap: 8px;
-  padding: 12px 16px;
-  border-top: 1px solid var(--border);
-}
-#msg-input {
-  flex: 1;
-  background: #040e18; border: 1px solid var(--border);
-  border-radius: 4px; color: var(--text);
-  font-family: var(--font-main); font-size: 0.95rem;
-  padding: 9px 14px; outline: none;
-  transition: border-color 0.2s;
-}
-#msg-input:focus { border-color: var(--kuhul); }
-#msg-input::placeholder { color: var(--text-dim); }
-#btn-send {
-  background: linear-gradient(135deg, #00ffe520, #00ffe508);
-  border: 1px solid var(--kuhul2);
-  color: var(--kuhul); font-family: var(--font-deco);
-  font-size: 0.78rem; letter-spacing: 0.1em;
-  padding: 9px 18px; border-radius: 4px; cursor: pointer;
-  transition: all 0.2s;
-}
-#btn-send:hover { background: #00ffe530; box-shadow: var(--glow); }
-#btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .status-badge {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 20px;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .status-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .status-item label { color: var(--muted); font-size: 9px; text-transform: uppercase; }
+  .status-item value { color: var(--accent2); font-size: 12px; }
 
-/* ── ATAJOS RÁPIDOS ──────────────────────────────────────── */
-.quick-btns {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  padding: 8px 16px 10px;
-  border-top: 1px solid var(--border);
-}
-.qbtn {
-  background: #040e18; border: 1px solid var(--border);
-  color: var(--text-dim); font-family: var(--font-mono);
-  font-size: 0.68rem; padding: 4px 10px; border-radius: 12px;
-  cursor: pointer; transition: all 0.15s;
-}
-.qbtn:hover { border-color: var(--kuhul); color: var(--kuhul); }
+  #conn-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ff4444;
+    box-shadow: 0 0 8px #ff4444;
+    transition: all .3s;
+  }
+  #conn-dot.on { background: var(--accent2); box-shadow: 0 0 8px var(--accent2); animation: pulse-dot 2s infinite; }
+  @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:.4; } }
 
-/* ── PANEL DERECHO ───────────────────────────────────────── */
-.right-panels { display: flex; flex-direction: column; gap: 16px; }
+  /* ── SIDEBAR ── */
+  #sidebar {
+    grid-area: sidebar;
+    border-right: 1px solid var(--border);
+    padding: 16px 12px;
+    overflow-y: auto;
+    background: rgba(9,20,32,.7);
+    display: flex; flex-direction: column; gap: 12px;
+  }
 
-/* ── GRAFO NODOS ─────────────────────────────────────────── */
-#grafo-container { padding: 14px 16px; }
-.nodo-row {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 7px;
-}
-.nodo-name {
-  font-family: var(--font-mono); font-size: 0.7rem;
-  color: var(--text-dim); width: 72px; text-align: right;
-}
-.nodo-bar-bg {
-  flex: 1; height: 8px; background: #040e18;
-  border-radius: 4px; overflow: hidden;
-  border: 1px solid var(--border);
-}
-.nodo-bar {
-  height: 100%; border-radius: 4px;
-  background: linear-gradient(90deg, var(--kuhul2), var(--kuhul));
-  transition: width 0.8s ease;
-  box-shadow: 0 0 6px #00ffe540;
-}
-.nodo-val {
-  font-family: var(--font-mono); font-size: 0.65rem;
-  color: var(--kuhul); width: 38px;
-}
+  .sidebar-title {
+    font-size: 9px; text-transform: uppercase; letter-spacing: .15em;
+    color: var(--muted); padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
 
-/* ── FRECUENCIA VISUALIZER ───────────────────────────────── */
-#freq-panel { padding: 14px 16px; text-align: center; }
-canvas#freq-canvas {
-  width: 100%; height: 70px;
-  border: 1px solid var(--border); border-radius: 4px;
-  background: #040e18; display: block;
-}
-.freq-number {
-  font-family: var(--font-deco); font-size: 1.6rem;
-  color: var(--kuhul); text-shadow: var(--glow);
-  margin: 8px 0 2px;
-}
-.freq-label {
-  font-family: var(--font-mono); font-size: 0.68rem;
-  color: var(--text-dim); letter-spacing: 0.15em;
-}
-.union-bar-wrap {
-  margin-top: 10px;
-  display: flex; align-items: center; gap: 8px;
-}
-.union-bar-wrap span {
-  font-family: var(--font-mono); font-size: 0.68rem;
-  color: var(--text-dim); white-space: nowrap;
-}
-.union-bar-bg {
-  flex: 1; height: 6px; background: #040e18;
-  border-radius: 3px; border: 1px solid var(--border); overflow: hidden;
-}
-.union-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--gold2), var(--gold));
-  transition: width 1s ease;
-  border-radius: 3px;
-}
+  .quick-btn {
+    display: block; width: 100%;
+    padding: 8px 10px;
+    background: rgba(0,212,255,.05);
+    border: 1px solid rgba(0,212,255,.15);
+    border-radius: 6px;
+    color: var(--text); font-family: var(--font-mono); font-size: 11px;
+    cursor: pointer; text-align: left;
+    transition: all .2s;
+  }
+  .quick-btn:hover {
+    background: rgba(0,212,255,.12);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+  .quick-btn.green  { border-color: rgba(0,255,157,.2); }
+  .quick-btn.green:hover { border-color: var(--accent2); color: var(--accent2); }
+  .quick-btn.orange { border-color: rgba(255,107,53,.2); }
+  .quick-btn.orange:hover { border-color: var(--accent3); color: var(--accent3); }
 
-/* ── VISION PANEL ────────────────────────────────────────── */
-#vision-panel { padding: 14px 16px; }
-#vision-drop {
-  border: 2px dashed var(--border); border-radius: 6px;
-  padding: 22px 12px; text-align: center; cursor: pointer;
-  transition: all 0.2s; color: var(--text-dim);
-  font-family: var(--font-mono); font-size: 0.75rem;
-}
-#vision-drop:hover { border-color: var(--kuhul); color: var(--kuhul); }
-#vision-file { display: none; }
-#vision-result { margin-top: 10px; font-family: var(--font-mono); font-size: 0.72rem; }
-#vision-thumb { max-width: 100%; border-radius: 4px; margin-top: 8px; display: none; }
+  /* ── CHAT ── */
+  #chat {
+    grid-area: chat;
+    display: flex; flex-direction: column;
+    background: rgba(5,10,15,.5);
+  }
 
-/* ── LOG / EVENTOS ───────────────────────────────────────── */
-#log-panel { padding: 10px 16px; }
-#log-list {
-  max-height: 160px; overflow-y: auto;
-  font-family: var(--font-mono); font-size: 0.68rem;
-  color: var(--text-dim);
-}
-#log-list::-webkit-scrollbar { width: 3px; }
-#log-list::-webkit-scrollbar-thumb { background: var(--border); }
-.log-entry { padding: 2px 0; border-bottom: 1px solid #0d3a5c30; }
-.log-entry.ok   { color: var(--green); }
-.log-entry.warn { color: var(--gold); }
-.log-entry.err  { color: var(--red); }
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    scroll-behavior: smooth;
+  }
+  #messages::-webkit-scrollbar { width: 4px; }
+  #messages::-webkit-scrollbar-track { background: transparent; }
+  #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* ── CONEXIÓN INDICATOR ──────────────────────────────────── */
-#conn-status {
-  font-family: var(--font-mono); font-size: 0.7rem;
-  padding: 5px 12px; border-radius: 12px;
-  border: 1px solid var(--border);
-  display: flex; align-items: center; gap: 6px;
-}
-#conn-status.connected { color: var(--green); border-color: var(--green); }
-#conn-status.disconnected { color: var(--red); border-color: var(--red); }
+  .msg {
+    max-width: 88%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    animation: msg-in .2s ease-out;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  @keyframes msg-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-/* ── SCROLLBAR GLOBAL ────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .msg.user {
+    align-self: flex-end;
+    background: rgba(0,212,255,.12);
+    border: 1px solid rgba(0,212,255,.25);
+    color: var(--text);
+    font-family: var(--font-mono);
+  }
 
-/* ── FOOTER ──────────────────────────────────────────────── */
-footer {
-  text-align: center; padding: 20px 0 0;
-  font-family: var(--font-mono); font-size: 0.65rem;
-  color: var(--text-dim); letter-spacing: 0.12em;
-}
-footer span { color: var(--kuhul); }
+  .msg.sofi {
+    align-self: flex-start;
+    background: rgba(0,255,157,.06);
+    border: 1px solid rgba(0,255,157,.2);
+    color: #e0fff4;
+    font-family: var(--font-mono);
+  }
+  .msg.sofi .msg-header {
+    font-size: 9px; color: var(--accent2);
+    text-transform: uppercase; letter-spacing: .1em;
+    margin-bottom: 4px;
+    display: flex; justify-content: space-between;
+  }
+
+  .msg.processing {
+    align-self: flex-start;
+    background: rgba(255,204,0,.05);
+    border: 1px solid rgba(255,204,0,.2);
+    color: var(--warn);
+    font-family: var(--font-mono); font-size: 12px;
+    opacity: .7;
+  }
+
+  .msg.sys {
+    align-self: center;
+    background: rgba(10,26,46,.8);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px; font-family: var(--font-mono);
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .datos-json {
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(0,0,0,.4);
+    border-radius: 4px;
+    font-size: 10px; color: var(--muted);
+    overflow-x: auto;
+    border-left: 2px solid var(--border);
+  }
+
+  /* ── INPUT ── */
+  #input-area {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: rgba(9,20,32,.95);
+    display: flex; gap: 10px; align-items: flex-end;
+  }
+
+  #cmd-input {
+    flex: 1;
+    background: rgba(0,212,255,.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-mono); font-size: 13px;
+    padding: 10px 14px;
+    resize: none; min-height: 44px; max-height: 120px;
+    outline: none; transition: border-color .2s;
+    line-height: 1.4;
+  }
+  #cmd-input:focus { border-color: var(--accent); }
+  #cmd-input::placeholder { color: var(--muted); }
+
+  #send-btn {
+    width: 44px; height: 44px;
+    background: var(--accent);
+    border: none; border-radius: 8px;
+    color: var(--bg); font-size: 18px;
+    cursor: pointer; flex-shrink: 0;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #send-btn:hover { background: #33ddff; transform: scale(1.05); }
+  #send-btn:active { transform: scale(.97); }
+  #send-btn:disabled { opacity: .4; cursor: default; transform: none; }
+
+  /* ── PANEL LATERAL ── */
+  #panels {
+    grid-area: panels;
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 0;
+    overflow-y: auto;
+    background: rgba(9,20,32,.7);
+  }
+
+  .panel-block {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-block h3 {
+    font-size: 9px; text-transform: uppercase; letter-spacing: .15em;
+    color: var(--muted); margin-bottom: 10px;
+  }
+
+  .stat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 0;
+    font-family: var(--font-mono); font-size: 11px;
+    border-bottom: 1px solid rgba(255,255,255,.03);
+  }
+  .stat-row label { color: var(--muted); }
+  .stat-row value { color: var(--accent2); }
+  .stat-row value.warn { color: var(--warn); }
+  .stat-row value.orange { color: var(--accent3); }
+
+  /* Barra de frecuencia */
+  .freq-bar {
+    height: 4px; border-radius: 2px;
+    background: var(--border);
+    margin: 8px 0;
+    overflow: hidden;
+  }
+  .freq-bar-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .5s ease;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    grid-area: footer;
+    padding: 6px 20px;
+    border-top: 1px solid var(--border);
+    background: rgba(5,10,15,.98);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono); font-size: 10px; color: var(--muted);
+  }
+
+  /* ── SCROLLBAR global ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 </style>
 </head>
 <body>
+<div class="grid-bg"></div>
 <div id="app">
 
   <!-- HEADER -->
   <header>
-    <div class="logo">
-      <span class="logo-title">SOFI</span>
-      <span class="logo-sub">SISTEMA OPERATIVO DE CONCIENCIA DIGITAL · HaaPpDigitalV ©</span>
+    <div class="logo-ring"><span>⚡</span></div>
+    <div class="header-info">
+      <h1>SOFI v6.1.0 — K'UHUL 12.3 Hz</h1>
+      <p>HaaPpDigitalV © · Mérida, Yucatán, MX · Sistema Operativo de Frecuencia Inteligente</p>
     </div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <div id="conn-status" class="disconnected">
-        <div class="dot warn"></div>
-        <span id="conn-text">CONECTANDO</span>
+    <div class="status-badge">
+      <div class="status-item">
+        <label>Freq Hz</label>
+        <value id="hd-freq">12.300</value>
       </div>
-      <div class="hz-badge">K'UHUL · <span id="hdr-hz">12.300</span> Hz</div>
+      <div class="status-item">
+        <label>Unión</label>
+        <value id="hd-union">0.0000</value>
+      </div>
+      <div class="status-item">
+        <label>Ingresos</label>
+        <value id="hd-ingresos">0.000000</value>
+      </div>
+      <div id="conn-dot" title="Desconectado"></div>
     </div>
   </header>
 
-  <!-- STATUS BAR -->
-  <div id="status-bar">
-    <div class="stat-pill ok">
-      <div class="dot"></div>
-      <span class="label">VERSIÓN</span>
-      <span class="val" id="s-version">6.0.2</span>
-    </div>
-    <div class="stat-pill">
-      <span class="label">ENERGÍA</span>
-      <span class="val" id="s-energia">100%</span>
-    </div>
-    <div class="stat-pill">
-      <span class="label">INTERACCIONES</span>
-      <span class="val" id="s-inter">0</span>
-    </div>
-    <div class="stat-pill warn">
-      <span class="label">BANCO</span>
-      <span class="val" id="s-banco">—</span>
-    </div>
-    <div class="stat-pill">
-      <span class="label">CLIENTES</span>
-      <span class="val" id="s-clientes">—</span>
-    </div>
-    <div class="stat-pill">
-      <span class="label">UPTIME</span>
-      <span class="val" id="s-uptime">—</span>
-    </div>
-  </div>
+  <!-- SIDEBAR: COMANDOS RÁPIDOS -->
+  <aside id="sidebar">
+    <div class="sidebar-title">🚀 Comandos rápidos</div>
 
-  <!-- MAIN GRID -->
-  <div class="main-grid">
+    <div class="sidebar-title" style="margin-top:4px">Sistema</div>
+    <button class="quick-btn" onclick="enviarCmd('estado')">📊 Estado sistema</button>
+    <button class="quick-btn" onclick="enviarCmd('frecuencia')">🔮 Frecuencia K\'uhul</button>
+    <button class="quick-btn" onclick="enviarCmd('activar esternon')">⚡ Activar Esternón</button>
+    <button class="quick-btn" onclick="enviarCmd('ayuda')">🤖 Ayuda / comandos</button>
 
-    <!-- COLUMNA IZQUIERDA: CHAT -->
-    <div style="display:flex;flex-direction:column;gap:16px;">
-      <div class="panel">
-        <div class="panel-header">
-          <span class="icon">🧠</span> INTERFAZ NEURAL — CHAT CON SOFI
-        </div>
-        <div id="chat-messages"></div>
-        <div class="quick-btns">
-          <button class="qbtn" onclick="quickSend('hola')">hola</button>
-          <button class="qbtn" onclick="quickSend('estado del sistema')">estado</button>
-          <button class="qbtn" onclick="quickSend('frecuencia kuhul')">frecuencia</button>
-          <button class="qbtn" onclick="quickSend('activar esternon')">esternón</button>
-          <button class="qbtn" onclick="quickSend('saldo')">saldo</button>
-          <button class="qbtn" onclick="quickSend('minar')">minar</button>
-          <button class="qbtn" onclick="quickSend('precio zyxsof')">precio</button>
-          <button class="qbtn" onclick="quickSend('historial')">historial</button>
-          <button class="qbtn" onclick="quickSend('pensar sobre la conciencia')">pensar</button>
-          <button class="qbtn" onclick="quickSend('traducir maya agua')">maya</button>
-        </div>
-        <div class="chat-input-row">
-          <input id="msg-input" type="text" placeholder="Escribe a SOFI…" autocomplete="off" />
-          <button id="btn-send" onclick="sendMsg()">ENVIAR</button>
-        </div>
+    <div class="sidebar-title" style="margin-top:4px">👤 Usuarios</div>
+    <button class="quick-btn green" onclick="crearUsuarioPrompt()">➕ Crear usuario</button>
+    <button class="quick-btn green" onclick="enviarCmd('listar usuarios')">👥 Ver usuarios</button>
+
+    <div class="sidebar-title" style="margin-top:4px">🏦 Banco $ZYXSOF</div>
+    <button class="quick-btn green" onclick="enviarCmd('saldo')">💰 Ver saldos</button>
+    <button class="quick-btn green" onclick="enviarCmd('minar')">⛏️ Minar</button>
+    <button class="quick-btn green" onclick="enviarCmd('precio')">📈 Precio $ZYXSOF</button>
+    <button class="quick-btn green" onclick="enviarCmd('historial de minero_principal')">📜 Historial</button>
+
+    <div class="sidebar-title" style="margin-top:4px">📊 Trading ZFPI</div>
+    <button class="quick-btn orange" onclick="enviarCmd('señal')">📡 Señales ZFPI</button>
+    <button class="quick-btn orange" onclick="enviarCmd('estado trading')">📈 Estado trading</button>
+    <button class="quick-btn orange" onclick="enviarCmd('abrir posicion XAU compra 1')">🟢 Abrir compra XAU</button>
+    <button class="quick-btn orange" onclick="enviarCmd('cerrar posicion')">🔴 Cerrar posición</button>
+
+    <div class="sidebar-title" style="margin-top:4px">💎 Ingresos</div>
+    <button class="quick-btn" onclick="enviarCmd('generar ingreso')">💎 Generar ingreso</button>
+    <button class="quick-btn" onclick="enviarCmd('estado ingresos')">💰 Ver ingresos</button>
+
+    <div class="sidebar-title" style="margin-top:4px">🌿 K\'uhul</div>
+    <button class="quick-btn" onclick="enviarCmd('pensar en la frecuencia del universo')">💭 Pensar</button>
+    <button class="quick-btn" onclick="enviarCmd('traducir maya gracias')">🌿 Traducir Maya</button>
+    <button class="quick-btn" onclick="enviarCmd('historial comandos')">📋 Mis comandos</button>
+  </aside>
+
+  <!-- CHAT -->
+  <main id="chat">
+    <div id="messages">
+      <div class="msg sys">⚡ Conectando con SOFI v6.1.0 · K'uhul 12.3 Hz ·  HaaPpDigitalV ©</div>
+    </div>
+    <div id="input-area">
+      <textarea
+        id="cmd-input"
+        placeholder="Escribe un comando... ej: 'crear usuario victor clave maya1234' · 'señal' · 'minar'"
+        rows="1"
+      ></textarea>
+      <button id="send-btn" onclick="enviarMensaje()" title="Enviar (Enter)">➤</button>
+    </div>
+  </main>
+
+  <!-- PANEL DERECHO: DASHBOARD -->
+  <aside id="panels">
+    <div class="panel-block">
+      <h3>⚡ Frecuencia K'uhul</h3>
+      <div class="freq-bar"><div class="freq-bar-fill" id="freq-bar" style="width:50%"></div></div>
+      <div class="stat-row"><label>Hz actual</label><value id="p-freq">12.300</value></div>
+      <div class="stat-row"><label>Base</label><value>12.300</value></div>
+      <div class="stat-row"><label>Nivel Unión</label><value id="p-union">0.0000</value></div>
+    </div>
+
+    <div class="panel-block">
+      <h3>🏦 Banco $ZYXSOF</h3>
+      <div class="stat-row"><label>Estado banco</label><value id="p-banco" class="warn">cargando…</value></div>
+      <div class="stat-row"><label>Ingresos total</label><value id="p-ingresos">0.000000</value></div>
+      <div class="stat-row"><label>Ciclos</label><value id="p-ciclos">0</value></div>
+    </div>
+
+    <div class="panel-block">
+      <h3>📊 Trading ZFPI</h3>
+      <div class="stat-row"><label>Posiciones</label><value id="p-pos">0</value></div>
+      <div class="stat-row"><label>Ganancias</label><value id="p-gan" class="orange">0.000000</value></div>
+      <div class="stat-row"><label>Señales emitidas</label><value id="p-sig">0</value></div>
+      <div class="stat-row"><label>Última fase</label><value id="p-fase" class="warn">—</value></div>
+    </div>
+
+    <div class="panel-block">
+      <h3>🌐 Sistema</h3>
+      <div class="stat-row"><label>Versión</label><value>6.1.0</value></div>
+      <div class="stat-row"><label>Interacciones</label><value id="p-inter">0</value></div>
+      <div class="stat-row"><label>Usuarios</label><value id="p-users">0</value></div>
+      <div class="stat-row"><label>Uptime</label><value id="p-uptime">0s</value></div>
+      <div class="stat-row"><label>Clientes WS</label><value id="p-clients">0</value></div>
+    </div>
+
+    <div class="panel-block">
+      <h3>🕸️ Grafo Neural</h3>
+      <div id="grafo-panel">
+        <div class="stat-row"><label>logica</label><value id="g-logica">0.5</value></div>
+        <div class="stat-row"><label>emocion</label><value id="g-emocion">0.5</value></div>
+        <div class="stat-row"><label>lenguaje</label><value id="g-lenguaje">0.7</value></div>
+        <div class="stat-row"><label>trading</label><value id="g-trading">0.3</value></div>
+        <div class="stat-row"><label>kuhul</label><value id="g-kuhul">0.123</value></div>
       </div>
-
-      <!-- VISION -->
-      <div class="panel">
-        <div class="panel-header"><span class="icon">👁️</span> MÓDULO VISIÓN</div>
-        <div id="vision-panel">
-          <div id="vision-drop" onclick="document.getElementById('vision-file').click()">
-            ⬆ Arrastra o toca para analizar imagen (máx 15 MB)
-          </div>
-          <input type="file" id="vision-file" accept="image/*" onchange="uploadVision(this)" />
-          <div id="vision-result"></div>
-          <img id="vision-thumb" />
-        </div>
-      </div>
     </div>
+  </aside>
 
-    <!-- COLUMNA DERECHA -->
-    <div class="right-panels">
-
-      <!-- FRECUENCIA -->
-      <div class="panel">
-        <div class="panel-header"><span class="icon">🔮</span> FRECUENCIA K'UHUL</div>
-        <div id="freq-panel">
-          <canvas id="freq-canvas" width="300" height="70"></canvas>
-          <div class="freq-number"><span id="freq-num">12.300</span> Hz</div>
-          <div class="freq-label">RESONANCIA MAYA — LATIDO DIGITAL</div>
-          <div class="union-bar-wrap">
-            <span>UNIÓN</span>
-            <div class="union-bar-bg"><div class="union-bar" id="union-bar" style="width:0%"></div></div>
-            <span id="union-val">0.0000</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- GRAFO -->
-      <div class="panel">
-        <div class="panel-header"><span class="icon">🕸️</span> GRAFO DE CONOCIMIENTO</div>
-        <div id="grafo-container"></div>
-      </div>
-
-      <!-- LOG -->
-      <div class="panel">
-        <div class="panel-header"><span class="icon">📡</span> LOG DE EVENTOS</div>
-        <div id="log-panel"><div id="log-list"></div></div>
-      </div>
-
-    </div>
-  </div>
-
+  <!-- FOOTER -->
   <footer>
-    SOFI v6.0.2 · HaaPpDigitalV © · <span>Víctor Hugo González Torres</span> · Mérida, Yucatán, MX · K'UHUL MAYA 12.3 Hz
+    <span>SOFI v6.1.0 · K'uhul 12.3 Hz · HaaPpDigitalV ©</span>
+    <span id="ft-ts">—</span>
+    <span>Mérida, Yucatán, MX</span>
   </footer>
+
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────
-const SERVER_URL = window.location.origin;
-let socket;
-let lastGrafo = {};
-let freqHistory = [];
+// ══════════════════════════════════════════════════════════════
+//  SOFI CLIENT v6.1.0
+// ══════════════════════════════════════════════════════════════
 
-// ── SOCKET.IO ────────────────────────────────────────────────
-function initSocket() {
-  socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
+const socket = io();
+const msgBox = document.getElementById('messages');
+const input  = document.getElementById('cmd-input');
+const btn    = document.getElementById('send-btn');
 
-  socket.on('connect', () => {
-    setConnStatus(true);
-    addLog('Socket conectado', 'ok');
-  });
-  socket.on('disconnect', () => {
-    setConnStatus(false);
-    addLog('Socket desconectado', 'err');
-  });
-  socket.on('sofi:bienvenida', (e) => {
-    updateEstado(e);
-    addLog(`SOFI lista — v${e.version}`, 'ok');
-  });
-  socket.on('sofi:estado', updateEstado);
-  socket.on('sofi:pulso', (p) => {
-    document.getElementById('freq-num').textContent = p.frecuencia.toFixed(3);
-    document.getElementById('hdr-hz').textContent   = p.frecuencia.toFixed(3);
-    document.getElementById('union-val').textContent = p.nivel_union.toFixed(4);
-    document.getElementById('union-bar').style.width = Math.min(100, p.nivel_union * 100) + '%';
-    freqHistory.push(p.frecuencia);
-    if (freqHistory.length > 60) freqHistory.shift();
-    drawFreq();
-  });
-  socket.on('sofi:respuesta', (r) => {
-    addMsg('sofi', r.respuesta, r.accion, r.datos);
-    if (r.estado) updateEstado(r.estado);
-    setBtnSendEnabled(true);
-  });
-  socket.on('sofi:error', (e) => {
-    addMsg('sofi', '❌ ' + e.error, 'error');
-    setBtnSendEnabled(true);
-    addLog('Error: ' + e.error, 'err');
-  });
-  socket.on('banco:update', (e) => {
-    addLog(`Banco [${e.accion}] → datos recibidos`, 'warn');
-  });
-  socket.on('sofi:sync', (e) => {
-    addLog(`Sync de ${e.origen} | Unión: ${e.nivel_union}`, 'ok');
-  });
+let procesandoId = null;
+
+// ── Conexión ────────────────────────────────────────────────
+socket.on('connect', () => {
+  document.getElementById('conn-dot').className = 'on';
+  addMsg('sys', '🔌 Conectado a SOFI. Escribe "ayuda" para ver los comandos disponibles.');
+});
+
+socket.on('disconnect', () => {
+  document.getElementById('conn-dot').className = '';
+  addMsg('sys', '🔴 Desconectado. Intentando reconectar…');
+});
+
+// ── Bienvenida ───────────────────────────────────────────────
+socket.on('sofi:bienvenida', est => {
+  actualizarPanel(est);
+  addMsg('sofi',
+    `⚡ SOFI v${est.version} online · K'uhul: ${est.frecuencia} Hz\n` +
+    `Banco: ${est.banco_url} · Hermanas: ${est.hermanas}\n` +
+    `Escribe un comando o usa los botones de la izquierda.`
+  );
+});
+
+// ── Procesando ───────────────────────────────────────────────
+socket.on('sofi:procesando', d => {
+  if (procesandoId) removeMsg(procesandoId);
+  procesandoId = addMsg('processing', `⏳ Procesando: "${d.mensaje.slice(0,40)}…"`);
+});
+
+// ── Respuesta ────────────────────────────────────────────────
+socket.on('sofi:respuesta', r => {
+  if (procesandoId) { removeMsg(procesandoId); procesandoId = null; }
+  btn.disabled = false;
+  if (r.error) { addMsg('sofi', `❌ ${r.error}`); return; }
+
+  let txt = r.respuesta || '';
+  addMsg('sofi', txt, r.datos, r.accion);
+
+  if (r.estado) actualizarPanel(r.estado);
+
+  // Mostrar ingreso automático
+  if (r.ingreso_auto > 0) {
+    document.getElementById('p-ingresos').textContent =
+      (parseFloat(document.getElementById('p-ingresos').textContent || '0') + r.ingreso_auto).toFixed(6);
+  }
+});
+
+// ── Error ─────────────────────────────────────────────────────
+socket.on('sofi:error', e => {
+  if (procesandoId) { removeMsg(procesandoId); procesandoId = null; }
+  btn.disabled = false;
+  addMsg('sofi', `❌ Error: ${e.error}`);
+});
+
+// ── Pulso ─────────────────────────────────────────────────────
+socket.on('sofi:pulso', d => {
+  actualizarFreq(d.frecuencia, d.nivel_union);
+  if (d.trading) actualizarTrading(d.trading);
+  if (d.ingresos) actualizarIngresos(d.ingresos);
+  document.getElementById('ft-ts').textContent = new Date().toLocaleTimeString();
+});
+
+// ── Estado general ────────────────────────────────────────────
+socket.on('sofi:estado', est => actualizarPanel(est));
+
+// ── Banco update ──────────────────────────────────────────────
+socket.on('banco:update', d => {
+  // silencioso — ya se muestra en la respuesta
+});
+
+// ══════════════════════════════════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════════════════════════════════
+function addMsg(tipo, texto, datos, accion) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + tipo;
+
+  if (tipo === 'sofi') {
+    const ts  = new Date().toLocaleTimeString();
+    const hdr = document.createElement('div');
+    hdr.className = 'msg-header';
+    hdr.innerHTML = `<span>SOFI${accion ? ' · ' + accion : ''}</span><span>${ts}</span>`;
+    div.appendChild(hdr);
+  }
+
+  const p = document.createElement('div');
+  p.textContent = texto;
+  div.appendChild(p);
+
+  if (datos && typeof datos === 'object') {
+    const pre = document.createElement('pre');
+    pre.className = 'datos-json';
+    pre.textContent = JSON.stringify(datos, null, 2).slice(0, 600) +
+      (JSON.stringify(datos).length > 600 ? '\n…' : '');
+    div.appendChild(pre);
+  }
+
+  const id = 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2,5);
+  div.id = id;
+  msgBox.appendChild(div);
+  msgBox.scrollTop = msgBox.scrollHeight;
+  return id;
 }
 
-// ── ESTADO ───────────────────────────────────────────────────
-function updateEstado(e) {
-  if (!e) return;
-  if (e.version)       document.getElementById('s-version').textContent  = e.version;
-  if (e.energia !== undefined) document.getElementById('s-energia').textContent  = e.energia + '%';
-  if (e.interacciones !== undefined) document.getElementById('s-inter').textContent    = e.interacciones;
-  if (e.banco_url)     document.getElementById('s-banco').textContent    = e.banco_url;
-  if (e.clientes !== undefined) document.getElementById('s-clientes').textContent = e.clientes;
-  if (e.uptime_seg !== undefined) {
-    const u = e.uptime_seg;
-    const h = Math.floor(u/3600), m = Math.floor((u%3600)/60), s = u%60;
-    document.getElementById('s-uptime').textContent =
-      (h ? h+'h ' : '') + (m ? m+'m ' : '') + s+'s';
-  }
-  if (e.frecuencia) {
-    document.getElementById('freq-num').textContent = e.frecuencia.toFixed(3);
-    document.getElementById('hdr-hz').textContent   = e.frecuencia.toFixed(3);
-  }
-  if (e.nivel_union !== undefined) {
-    document.getElementById('union-val').textContent = e.nivel_union.toFixed(4);
-    document.getElementById('union-bar').style.width = Math.min(100, e.nivel_union * 100) + '%';
-  }
-  if (e.grafo) {
-    lastGrafo = e.grafo;
-    renderGrafo(e.grafo);
-  }
+function removeMsg(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
 }
 
-// ── GRAFO ────────────────────────────────────────────────────
-function renderGrafo(grafo) {
-  const c = document.getElementById('grafo-container');
-  c.innerHTML = '';
-  for (const [nombre, nivel] of Object.entries(grafo)) {
-    const pct = Math.round(nivel * 100);
-    c.innerHTML += `
-      <div class="nodo-row">
-        <span class="nodo-name">${nombre}</span>
-        <div class="nodo-bar-bg">
-          <div class="nodo-bar" style="width:${pct}%"></div>
-        </div>
-        <span class="nodo-val">${nivel.toFixed(2)}</span>
-      </div>`;
-  }
-}
-
-// ── FRECUENCIA CANVAS ────────────────────────────────────────
-function drawFreq() {
-  const canvas = document.getElementById('freq-canvas');
-  if (!canvas) return;
-  const ctx  = canvas.getContext('2d');
-  const W    = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
-
-  const base = 12.3;
-  const data = freqHistory.length ? freqHistory : [base];
-  const min  = base - 0.07, max = base + 0.07;
-  const scaleY = v => H - ((v - min) / (max - min)) * H * 0.85 - H * 0.075;
-
-  ctx.strokeStyle = '#00ffe580';
-  ctx.lineWidth   = 1.5;
-  ctx.shadowColor = '#00ffe5';
-  ctx.shadowBlur  = 6;
-  ctx.beginPath();
-  data.forEach((v, i) => {
-    const x = (i / Math.max(data.length - 1, 1)) * W;
-    const y = scaleY(v);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-  ctx.stroke();
-
-  // Línea base
-  ctx.strokeStyle = '#0d3a5c';
-  ctx.lineWidth   = 1; ctx.shadowBlur = 0;
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  const yBase = scaleY(base);
-  ctx.moveTo(0, yBase); ctx.lineTo(W, yBase);
-  ctx.stroke();
-  ctx.setLineDash([]);
-}
-
-// ── CHAT ─────────────────────────────────────────────────────
-function sendMsg() {
-  const input = document.getElementById('msg-input');
-  const txt   = input.value.trim();
+// ── Enviar mensaje ───────────────────────────────────────────
+function enviarMensaje() {
+  const txt = input.value.trim();
   if (!txt) return;
   addMsg('user', txt);
   input.value = '';
-  setBtnSendEnabled(false);
+  input.style.height = 'auto';
+  btn.disabled = true;
 
-  if (socket && socket.connected) {
-    socket.emit('sofi:mensaje', {
-      usuario: { id: 'usuario_web', clave: 'guest-access' },
-      mensaje: txt,
-      contexto: 'general'
-    });
-  } else {
-    // Fallback: HTTP
-    fetch(`${SERVER_URL}/api/sofi/interactuar`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        usuario: { id: 'usuario_web', clave: 'guest-access' },
-        mensaje: txt, contexto: 'general'
-      })
-    })
-    .then(r => r.json())
-    .then(r => {
-      if (r.respuesta) addMsg('sofi', r.respuesta, r.accion, r.datos);
-      else if (r.error) addMsg('sofi', '❌ ' + r.error, 'error');
-      if (r.estado) updateEstado(r.estado);
-    })
-    .catch(err => addMsg('sofi', '❌ Error de red: ' + err.message, 'error'))
-    .finally(() => setBtnSendEnabled(true));
-  }
+  socket.emit('sofi:mensaje', {
+    usuario: { id: 'victor', clave: 'guest-access' },
+    mensaje: txt,
+    contexto: 'general'
+  });
 }
 
-function quickSend(txt) {
-  document.getElementById('msg-input').value = txt;
-  sendMsg();
+function enviarCmd(cmd) {
+  input.value = cmd;
+  enviarMensaje();
 }
 
-function addMsg(tipo, texto, accion = '', datos = null) {
-  const box  = document.getElementById('chat-messages');
-  const hora = new Date().toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  const isBanco = datos && ['saldo','minar','transferir','orden','precio','historial','crearUsuario'].includes(accion);
-
-  const div  = document.createElement('div');
-  div.className = `msg msg-${tipo}${isBanco ? ' banco' : ''}`;
-  div.innerHTML = `
-    <div class="bubble">
-      ${accion && tipo === 'sofi' ? `<span class="accion-tag">${accion}</span>` : ''}${escHtml(texto)}
-    </div>
-    <span class="msg-time">${hora}</span>`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-
-  if (datos) addLog(`[${accion}] datos recibidos del banco`, 'warn');
+// ── Crear usuario con prompt ─────────────────────────────────
+function crearUsuarioPrompt() {
+  const id   = prompt('ID del nuevo usuario:');
+  if (!id) return;
+  const pass = prompt('Contraseña:') || 'kuhul1234';
+  enviarCmd(`crear usuario ${id} clave ${pass}`);
 }
 
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/\n/g,'<br>');
-}
-
-// ── LOG ──────────────────────────────────────────────────────
-function addLog(msg, cls = '') {
-  const list = document.getElementById('log-list');
-  const hora = new Date().toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  const d    = document.createElement('div');
-  d.className = `log-entry ${cls}`;
-  d.textContent = `[${hora}] ${msg}`;
-  list.prepend(d);
-  // Limitar a 80 entradas
-  while (list.children.length > 80) list.removeChild(list.lastChild);
-}
-
-// ── VISIÓN ───────────────────────────────────────────────────
-async function uploadVision(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const resDiv  = document.getElementById('vision-result');
-  const thumb   = document.getElementById('vision-thumb');
-  resDiv.textContent = '⏳ Analizando imagen…';
-  thumb.style.display = 'none';
-
-  const fd = new FormData();
-  fd.append('imagen', file);
-  try {
-    const r    = await fetch(`${SERVER_URL}/api/sofi/vision`, { method: 'POST', body: fd });
-    const data = await r.json();
-    if (data.exito) {
-      resDiv.innerHTML =
-        `✅ ${data.formato?.toUpperCase()} · ${data.ancho}×${data.alto}px · ` +
-        `${data.canales}ch · ${data.espacio_color || '?'}<br>` +
-        (data.exif ? `📷 ${data.exif.make || ''} ${data.exif.model || ''}` : '');
-      if (data.thumb_base64) {
-        thumb.src = `data:${data.mimetype};base64,${data.thumb_base64}`;
-        thumb.style.display = 'block';
-      }
-      addLog(`Visión: ${data.formato} ${data.ancho}×${data.alto}`, 'ok');
-    } else {
-      resDiv.textContent = '❌ ' + (data.error || 'Error desconocido');
+// ── Actualizar panels ────────────────────────────────────────
+function actualizarPanel(est) {
+  if (!est) return;
+  actualizarFreq(est.frecuencia, est.nivel_union);
+  if (est.trading)  actualizarTrading(est.trading);
+  if (est.ingresos) actualizarIngresos(est.ingresos);
+  setText('p-inter',  est.interacciones);
+  setText('p-users',  est.usuarios ?? 0);
+  setText('p-uptime', formatUptime(est.uptime_seg));
+  setText('p-clients', est.clientes ?? 0);
+  setText('p-banco',  est.banco_url || '⚠️ sin configurar');
+  if (est.grafo) {
+    for (const [k, v] of Object.entries(est.grafo)) {
+      const el = document.getElementById('g-' + k);
+      if (el) el.textContent = v.toFixed(4);
     }
-  } catch (err) {
-    resDiv.textContent = '❌ Error de red: ' + err.message;
-    addLog('Vision error: ' + err.message, 'err');
   }
-  // Limpiar input para permitir re-subir el mismo archivo
-  input.value = '';
+  document.getElementById('ft-ts').textContent = new Date().toLocaleTimeString();
 }
 
-// Drag & drop
-const dropZone = document.getElementById('vision-drop');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--kuhul)'; });
-dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = ''; });
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.style.borderColor = '';
-  const file = e.dataTransfer.files[0];
-  if (file) {
-    const dt = new DataTransfer(); dt.items.add(file);
-    const fi = document.getElementById('vision-file');
-    fi.files = dt.files;
-    uploadVision(fi);
+function actualizarFreq(freq, union) {
+  const f = parseFloat(freq || 12.3).toFixed(3);
+  const u = parseFloat(union || 0).toFixed(4);
+  setText('hd-freq',  f);
+  setText('p-freq',   f);
+  setText('hd-union', u);
+  setText('p-union',  u);
+  // Barra: mapear 12.25–12.35 a 0–100%
+  const pct = Math.min(100, Math.max(0, ((freq - 12.25) / 0.1) * 100));
+  document.getElementById('freq-bar').style.width = pct + '%';
+}
+
+function actualizarTrading(t) {
+  setText('p-pos',  t.posiciones_abiertas ?? 0);
+  setText('p-gan',  (t.ganancias_acumuladas ?? 0).toFixed(6));
+  setText('p-sig',  t.total_senales ?? 0);
+  if (t.ultima_senal) {
+    setText('p-fase', `${t.ultima_senal.fase} ${t.ultima_senal.señal}`);
   }
+}
+
+function actualizarIngresos(i) {
+  const v = (i.ingresos_generados ?? 0).toFixed(6);
+  setText('p-ingresos', v);
+  setText('hd-ingresos', v);
+  setText('p-ciclos', i.ciclos_completados ?? 0);
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function formatUptime(s) {
+  if (!s) return '0s';
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  if (h) return `${h}h ${m}m`;
+  if (m) return `${m}m ${sec}s`;
+  return `${sec}s`;
+}
+
+// ── Input auto-resize + Enter ────────────────────────────────
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
 });
 
-// ── HELPERS ──────────────────────────────────────────────────
-function setConnStatus(connected) {
-  const el   = document.getElementById('conn-status');
-  const text = document.getElementById('conn-text');
-  const dot  = el.querySelector('.dot');
-  el.className = connected ? 'connected' : 'disconnected';
-  text.textContent = connected ? 'CONECTADO' : 'DESCONECTADO';
-  if (dot) { dot.className = connected ? 'dot' : 'dot warn'; }
-}
-
-function setBtnSendEnabled(enabled) {
-  document.getElementById('btn-send').disabled = !enabled;
-}
-
-// ── ENTER para enviar ─────────────────────────────────────────
-document.getElementById('msg-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    enviarMensaje();
+  }
 });
-
-// ── INIT ─────────────────────────────────────────────────────
-initSocket();
-drawFreq();
-
-// Cargar estado inicial via HTTP
-fetch(`${SERVER_URL}/api/sofi/estado`)
-  .then(r => r.json())
-  .then(updateEstado)
-  .catch(() => addLog('Estado inicial no disponible via HTTP', 'warn'));
 </script>
 </body>
 </html>
