@@ -498,7 +498,9 @@
 //  SOFI CLIENT v6.1.0
 // ══════════════════════════════════════════════════════════════
 
-const socket = io();
+const socket = io('https://sofi-server-avwu.onrender.com', {
+  transports: ['websocket', 'polling']
+});
 const msgBox = document.getElementById('messages');
 const input  = document.getElementById('cmd-input');
 const btn    = document.getElementById('send-btn');
